@@ -16,32 +16,45 @@
 #'
 #' @param digits Used with signif() to specify the number of significant digits (default = 5).
 #'
+#' @param num.perms Number of permutations used to assess significance (default = 1e3).
+#'
+#' @param random.seed Random seed (default = NULL).
+#'
 #' @param alternative A character string ("greater" or "less") that specifies the direction of the alternative hypothesis, 
 #'	either rho > 0 or rho < 0 (default = "greater").
 #'
-#' @return Returns a eight-column matrix.  The first three columns are the same as gene.annot.  The fourth column contains
+#' @return Returns a five-column matrix.  The first three columns are the same as gene.annot.  The fourth column contains
 #'	gene-specific Pearson or Spearman correlation coefficients based on the entries in each row of exp.mat and cn.mat, 
 #'	respectively (column name = "R").  The fifth column contains squared Pearson correlation coefficients (column name = "R^2").  
-#'	The sixth column contains t statistics corresponding to the correlation coefficients (column name = "tStat").  The
-#'	seventh column contains the right-tailed p-value based on the t statistic (column name = "pValue").  The eighth column
-#'	contains Benjamini-Hochberg q-values corresponding to the p-values.  Genes with constant gene expression
+#'	The sixth column contains the permutation-based right-tailed p-value of the correlation coefficient (column name = "perm_pValue").
+#'	The seventh column contains Benjamini-Hochberg q-values corresponding to the p-values.  Genes with constant gene expression
 #'	or DNA copy number are removed because they have zero variance.
 #'
-#' @examples corr.results = exp.mat = tcga.exp.convert(exp.mat)
+#' @examples exp.mat = tcga.exp.convert(exp.mat)
 #'
 #'  cn.mat = tcga.cn.convert(cn.mat)
 #'
-#'  prepped.data = data.prep(exp.mat, cn.mat, gene.annot, sample.annot, log.exp = FALSE)
+#'  genes = c("MYEOV", "CCND1", "ORAOV1", "FGF19", "FGF4", "FGF3", "ANO1", "PPFIA1")
 #'
-#'  corr.compute(prepped.data[["exp"]], prepped.data[["cn"]], prepped.data[["gene.annot"]])
+#'  pd = data.prep(exp.mat, cn.mat, gene.annot, sample.annot, log.exp = FALSE, gene.list = genes)
+#'
+#'  pd.exp = pd[["exp"]]
+#'
+#'  pd.cn = pd[["cn"]]
+#'
+#'  pd.ga = pd[["gene.annot"]]
+#'
+#'  perm.significance(pd.exp, pd.cn, pd.ga)
 #'
 #' @export
-corr.compute = function(
+perm.significance = function(
 	exp.mat, 
 	cn.mat, 
 	gene.annot,
 	method = "pearson",
 	digits = 5,
+	num.perms = 1e3,
+	random.seed = NULL,
 	alternative = "greater"
 	)
 	{
@@ -68,26 +81,46 @@ corr.compute = function(
 		}
 	
 	#Compute correlation coefficients for all genes
-	cn.mat = cn.mat - rowMeans(cn.mat)
-	cn.mat = cn.mat/sqrt(rowSums(cn.mat^2))
-	exp.mat = exp.mat - rowMeans(exp.mat)
-	exp.mat = exp.mat/sqrt(rowSums(exp.mat^2))
-	r.vec = rowSums(cn.mat * exp.mat)
+	cn.mat2 = cn.mat - rowMeans(cn.mat)
+	cn.mat2 = cn.mat2/sqrt(rowSums(cn.mat2^2))
+	exp.mat2 = exp.mat - rowMeans(exp.mat)
+	exp.mat2 = exp.mat2/sqrt(rowSums(exp.mat2^2))
+	r.vec = rowSums(cn.mat2 * exp.mat2)
 
-	#Compute t statitics, p-values, and q-values
-	t.vec = r.vec * sqrt((ncol(exp.mat) - 2)/(1 - r.vec^2))
-	p.vec = (as.numeric(alternative == "greater") * (1 - pt(t.vec, ncol(exp.mat) - 2))) +
-		(as.numeric(alternative == "less") * (pt(t.vec, ncol(exp.mat) - 2)))
-	q.vec = p.adjust(p.vec, method = "BH")
+	#Set random seed, if appropriate
+	if (!is.null(random.seed))
+		{
+		set.seed(random.seed)
+		}
+
+	#Recompute correlation coefficients after permutation
+	perm.results = matrix(NA, nrow(exp.mat), num.perms)
+	for (i in (1:num.perms))
+		{
+		temp.perm = sample(c(1:ncol(exp.mat)))
+		perm.cn.mat = cn.mat[,temp.perm]
+		perm.cn.mat = perm.cn.mat - rowMeans(perm.cn.mat)
+		perm.cn.mat = perm.cn.mat/sqrt(rowSums(perm.cn.mat^2))
+		perm.exp.mat = exp.mat - rowMeans(exp.mat)
+		perm.exp.mat = perm.exp.mat/sqrt(rowSums(perm.exp.mat^2))
+		perm.results[,i] = rowSums(perm.cn.mat * perm.exp.mat)
+		}
+
+	#Assess the significance of the entries in r.vec using rows of perm.results
+	perm.results = cbind(r.vec, perm.results)
+	perm.ranks = t(apply(perm.results, 1, rank))
+	perm.pvals = (as.numeric(alternative == "greater") * (num.perms + 2 - perm.ranks[,1])/num.perms) +
+		(as.numeric(alternative == "less") * (perm.ranks[,1])/num.perms)
+	perm.pvals[which(perm.pvals > 1)] = 1
+	perm.qvals = p.adjust(perm.pvals, method = "BH")
 
 	#Create and return output
 	output = cbind(gene.annot, signif(r.vec, digits), signif(r.vec^2, digits),
-		signif(t.vec, digits), signif(p.vec, digits), signif(q.vec, digits))
+		signif(perm.pvals, digits), signif(perm.qvals, digits))
 	colnames(output)[4] = "R"
 	colnames(output)[5] = "R^2"
-	colnames(output)[6] = "tStat"
-	colnames(output)[7] = "pValue"
-	colnames(output)[8] = "qValue"
+	colnames(output)[6] = "perm_pValue"
+	colnames(output)[7] = "perm_qValue"
 	rownames(output) = rownames(exp.mat)
 	return(output)
 	}

@@ -12,9 +12,12 @@
 #'	the form 'chr1' (note that chrX and chrY should be written chr23 and chr24), Column 2 = position (in base pairs), Column 3 = cytoband.
 #'
 #' @param sample.annot An optional two-column matrix of sample annotation data.  Column 1 = sample IDs, Column 2 = categorical sample annotation 
-#' (e.g. tumor vs. normal).  If NULL, sample annot will be created using the common sample IDs and a single group ('1').  Default = NULL.
+#' 	(e.g. tumor vs. normal).  If NULL, sample annot will be created using the common sample IDs and a single group ('1').  Default = NULL.
 #'
 #' @param log.exp A logical value indicating whether or not the expression values have been log-transformed.  Default = FALSE.
+#'
+#' @param gene.list Used to restrict the output to a set of genes of interest, e.g. genes identified by GISTIC as having
+#' 	recurrent copy number alterations.  Default = NULL, and in this case all genes are used.
 #'
 #' @return Returns a list with four components:  cn, exp, gene.annot, and sample.annot.  Each of cn, exp, and gene.annot have been restricted 
 #'	to a common set of genes, and these appear in the same order.  Similarly, cn, exp, and sample.annot have been restricted to a common set
@@ -32,15 +35,20 @@ data.prep = function(
 	cn.mat,
 	gene.annot,
 	sample.annot = NULL,
-	log.exp = FALSE
+	log.exp = FALSE,
+	gene.list = NULL
 	)
 	{
 	#Restrict exp.mat, cn.mat, and gene.annot to a common set of genes
 	common.genes = intersect(intersect(rownames(exp.mat), rownames(cn.mat)), 
 		rownames(gene.annot))
+	if (!is.null(gene.list))
+		{
+		common.genes = intersect(common.genes, gene.list)
+		}
 	if (length(common.genes) == 0)
 		{
-		stop("Exiting.  Check that gene names are the same in the input files.")
+		stop("Exiting because there are no common genes.  Please check the input files.")
 		} else	{
 				exp.mat = exp.mat[sort(common.genes),]
 				cn.mat = cn.mat[sort(common.genes),]

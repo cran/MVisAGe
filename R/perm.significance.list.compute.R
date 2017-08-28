@@ -20,36 +20,44 @@
 #'
 #' @param digits Used with signif() to specify the number of significant digits (default = 5).
 #'
+#' @param num.perms Number of permutations used to assess significance (default = 1e3).
+#'
+#' @param random.seed Random seed (default = NULL).
+#'
 #' @param alternative A character string ("greater" or "less") that specifies the direction of the alternative hypothesis, 
 #'	either rho > 0 or rho < 0 (default = "greater").
 #'
 #' @return Returns a list whose length is the number of unique groups defined by sample.annot.  Each entry in the list is the
-#'	output of corr.compute.
+#'	output of perm.significance.
 #'
 #' @examples exp.mat = tcga.exp.convert(exp.mat)
 #'
 #'  cn.mat = tcga.cn.convert(cn.mat)
 #'
-#'  prepped.data = data.prep(exp.mat, cn.mat, gene.annot, sample.annot, log.exp = FALSE)
+#'  genes = c("MYEOV", "CCND1", "ORAOV1", "FGF19", "FGF4", "FGF3", "ANO1", "PPFIA1")
 #'
-#'  pd.exp = prepped.data[["exp"]]
+#'  pd = data.prep(exp.mat, cn.mat, gene.annot, sample.annot, log.exp = FALSE, gene.list = genes)
 #'
-#'  pd.cn = prepped.data[["cn"]]
+#'  pd.exp = pd[["exp"]]
 #'
-#'  pd.ga = prepped.data[["gene.annot"]]
+#'  pd.cn = pd[["cn"]]
 #'
-#'  pd.sa = prepped.data[["sample.annot"]]
+#'  pd.ga = pd[["gene.annot"]]
 #'
-#'  corr.list.compute(pd.exp, pd.cn, pd.ga, pd.sa)
+#'  pd.sa = pd[["sample.annot"]]
+#'
+#'  perm.significance.list.compute(pd.exp, pd.cn, pd.ga, pd.sa)
 #'
 #' @export
-corr.list.compute = function(
+perm.significance.list.compute = function(
 	exp.mat, 
 	cn.mat, 
 	gene.annot,
 	sample.annot = NULL,
 	method = "pearson",
 	digits = 5,
+	num.perms = 1e3,
+	random.seed = NULL,
 	alternative = "greater"
 	)
 	{
@@ -80,9 +88,9 @@ corr.list.compute = function(
 	names(corr.list) = sample.groups
 	for (i in c(1:length(corr.list)))
 		{
-		corr.list[[sample.groups[i]]] = corr.compute(exp.mat = exp.list[[sample.groups[i]]], 
+		corr.list[[sample.groups[i]]] = perm.significance(exp.mat = exp.list[[sample.groups[i]]], 
 			cn.mat = cn.list[[sample.groups[i]]], gene.annot, method = method, digits = digits,
-			alternative = alternative)
+			num.perms, random.seed, alternative = alternative)
 		}
 
 	return(corr.list)
