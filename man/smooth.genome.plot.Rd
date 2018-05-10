@@ -7,11 +7,11 @@
 smooth.genome.plot(plot.list, plot.column = "R^2", annot.colors = c("black",
   "red", "green", "blue", "cyan"), vert.pad = 0.05, ylim.low = NULL,
   ylim.high = NULL, plot.legend = TRUE, legend.loc = "bottomright",
-  lty.vec = NULL, lwd.vec = NULL, loess.span = 100, expand.size = 50,
+  lty.vec = NULL, lwd.vec = NULL, loess.span = 250, expand.size = 50,
   rect.colors = c("light gray", "gray"), chr.label = TRUE,
   xaxis.label = "Chromosome", yaxis.label = NULL, main.label = NULL,
   axis.cex = 1, label.cex = 1, xaxis.line = 1.5, yaxis.line = 2.5,
-  main.line = 0)
+  main.line = 0, margin.vec = rep(1, 4))
 }
 \arguments{
 \item{plot.list}{A list produced by corr.list.compute().}
@@ -61,6 +61,8 @@ extended by expand.size genes, smoothing is performed on the expanded chromosome
 \item{yaxis.line}{Numerical value used to specify location of yaxis.label.  Default = 0.  See \code{\link{mtext}}.}
 
 \item{main.line}{Numerical value used to specify location of main.label.  Default = 0.  See \code{\link{mtext}}.}
+
+\item{margin.vec}{Numerical vector specifying margin sizes.  Default = rep(1, 4).  See \code{\link{par}}.}
 }
 \value{
 Creates a plot of gene-level R or R^2 values produced by corr.list.compute().  Values of R

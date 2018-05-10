@@ -5,7 +5,7 @@
 \title{A Function for Creating a List of Pearson Correlation Coefficients}
 \usage{
 perm.significance.list.compute(exp.mat, cn.mat, gene.annot,
-  sample.annot = NULL, method = "pearson", digits = 5, num.perms = 1000,
+  sample.annot = NULL, method = "pearson", digits = 5, num.perms = 100,
   random.seed = NULL, alternative = "greater")
 }
 \arguments{
@@ -26,7 +26,7 @@ Genes should appear in the same order as exp.mat and cn.mat.}
 
 \item{digits}{Used with signif() to specify the number of significant digits (default = 5).}
 
-\item{num.perms}{Number of permutations used to assess significance (default = 1e3).}
+\item{num.perms}{Number of permutations used to assess significance (default = 1e2).}
 
 \item{random.seed}{Random seed (default = NULL).}
 
@@ -46,17 +46,15 @@ exp.mat = tcga.exp.convert(exp.mat)
 
  cn.mat = tcga.cn.convert(cn.mat)
 
- genes = c("MYEOV", "CCND1", "ORAOV1", "FGF19", "FGF4", "FGF3", "ANO1", "PPFIA1")
+ prepped.data = data.prep(exp.mat, cn.mat, gene.annot, sample.annot, log.exp = FALSE)
 
- pd = data.prep(exp.mat, cn.mat, gene.annot, sample.annot, log.exp = FALSE, gene.list = genes)
+ pd.exp = prepped.data[["exp"]]
 
- pd.exp = pd[["exp"]]
+ pd.cn = prepped.data[["cn"]]
 
- pd.cn = pd[["cn"]]
+ pd.ga = prepped.data[["gene.annot"]]
 
- pd.ga = pd[["gene.annot"]]
-
- pd.sa = pd[["sample.annot"]]
+ pd.sa = prepped.data[["sample.annot"]]
 
  perm.significance.list.compute(pd.exp, pd.cn, pd.ga, pd.sa)
 

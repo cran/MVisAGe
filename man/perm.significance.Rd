@@ -5,7 +5,7 @@
 \title{A Function for Computing a Vector of Pearson Correlation Coefficients}
 \usage{
 perm.significance(exp.mat, cn.mat, gene.annot, method = "pearson",
-  digits = 5, num.perms = 1000, random.seed = NULL,
+  digits = 5, num.perms = 100, random.seed = NULL,
   alternative = "greater")
 }
 \arguments{
@@ -23,7 +23,7 @@ Genes should appear in the same order as exp.mat and cn.mat.}
 
 \item{digits}{Used with signif() to specify the number of significant digits (default = 5).}
 
-\item{num.perms}{Number of permutations used to assess significance (default = 1e3).}
+\item{num.perms}{Number of permutations used to assess significance (default = 1e2).}
 
 \item{random.seed}{Random seed (default = NULL).}
 
@@ -46,16 +46,8 @@ exp.mat = tcga.exp.convert(exp.mat)
 
  cn.mat = tcga.cn.convert(cn.mat)
 
- genes = c("MYEOV", "CCND1", "ORAOV1", "FGF19", "FGF4", "FGF3", "ANO1", "PPFIA1")
+ prepped.data = data.prep(exp.mat, cn.mat, gene.annot, sample.annot, log.exp = FALSE)
 
- pd = data.prep(exp.mat, cn.mat, gene.annot, sample.annot, log.exp = FALSE, gene.list = genes)
-
- pd.exp = pd[["exp"]]
-
- pd.cn = pd[["cn"]]
-
- pd.ga = pd[["gene.annot"]]
-
- perm.significance(pd.exp, pd.cn, pd.ga)
+ perm.significance(prepped.data[["exp"]], prepped.data[["cn"]], prepped.data[["gene.annot"]])
 
 }

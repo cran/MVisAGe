@@ -50,6 +50,8 @@
 #'
 #' @param main.line Numerical value used to specify location of main.label.  Default = 0.  See \code{\link{mtext}}.
 #'
+#' @param margin.vec Numerical vector specifying margin sizes.  Default = rep(1, 4).  See \code{\link{par}}.
+#'
 #' @return Creates a plot of gene-level R or R^2 values produced by corr.list.compute().  Values of R
 #'
 #' @examples exp.mat = tcga.exp.convert(exp.mat)
@@ -82,7 +84,7 @@ smooth.genome.plot = function(
 	legend.loc = "bottomright",
 	lty.vec = NULL,
 	lwd.vec = NULL,
-	loess.span = 100,
+	loess.span = 250,
 	expand.size = 50,
 	rect.colors = c("light gray", "gray"),
 	chr.label = TRUE,
@@ -93,7 +95,8 @@ smooth.genome.plot = function(
 	label.cex = 1,
 	xaxis.line = 1.5,
 	yaxis.line = 2.5,
-	main.line = 0
+	main.line = 0,
+	margin.vec = rep(1, 4)
 	)
 	{
 	#Restrict plot.list to a common set of genes.  This may be necessary if 
@@ -186,7 +189,7 @@ smooth.genome.plot = function(
 		ylim.high = max(ylim.high, max(plot.vals)) + vert.pad
 		} else ylim.high = max(plot.vals) + vert.pad
 
-	par(mar = c(1, 1, 1, 1))
+	par(mar = margin.vec)
 	plot(x.vals, 
 		rep(0, length(x.vals)), 
 		xlim = range(cumdists), 

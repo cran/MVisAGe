@@ -1,3 +1,9 @@
+# MVisAGe 0.2.1
+
+* Bug fixes to smooth.genome.plot() were made.
+
+*MVisAGe 0.2.1 was submitted to CRAN on May 7, 2018.
+
 # MVisAGe 0.2.0
 
 * The functions corr.compute() and corr.list.compute() now provide the option to calculate Spearman correlation coefficients.

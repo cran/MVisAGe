@@ -16,7 +16,7 @@
 #'
 #' @param digits Used with signif() to specify the number of significant digits (default = 5).
 #'
-#' @param num.perms Number of permutations used to assess significance (default = 1e3).
+#' @param num.perms Number of permutations used to assess significance (default = 1e2).
 #'
 #' @param random.seed Random seed (default = NULL).
 #'
@@ -34,17 +34,9 @@
 #'
 #'  cn.mat = tcga.cn.convert(cn.mat)
 #'
-#'  genes = c("MYEOV", "CCND1", "ORAOV1", "FGF19", "FGF4", "FGF3", "ANO1", "PPFIA1")
+#'  prepped.data = data.prep(exp.mat, cn.mat, gene.annot, sample.annot, log.exp = FALSE)
 #'
-#'  pd = data.prep(exp.mat, cn.mat, gene.annot, sample.annot, log.exp = FALSE, gene.list = genes)
-#'
-#'  pd.exp = pd[["exp"]]
-#'
-#'  pd.cn = pd[["cn"]]
-#'
-#'  pd.ga = pd[["gene.annot"]]
-#'
-#'  perm.significance(pd.exp, pd.cn, pd.ga)
+#'  perm.significance(prepped.data[["exp"]], prepped.data[["cn"]], prepped.data[["gene.annot"]])
 #'
 #' @export
 perm.significance = function(
@@ -53,7 +45,7 @@ perm.significance = function(
 	gene.annot,
 	method = "pearson",
 	digits = 5,
-	num.perms = 1e3,
+	num.perms = 1e2,
 	random.seed = NULL,
 	alternative = "greater"
 	)

@@ -20,7 +20,7 @@
 #'
 #' @param digits Used with signif() to specify the number of significant digits (default = 5).
 #'
-#' @param num.perms Number of permutations used to assess significance (default = 1e3).
+#' @param num.perms Number of permutations used to assess significance (default = 1e2).
 #'
 #' @param random.seed Random seed (default = NULL).
 #'
@@ -34,17 +34,15 @@
 #'
 #'  cn.mat = tcga.cn.convert(cn.mat)
 #'
-#'  genes = c("MYEOV", "CCND1", "ORAOV1", "FGF19", "FGF4", "FGF3", "ANO1", "PPFIA1")
+#'  prepped.data = data.prep(exp.mat, cn.mat, gene.annot, sample.annot, log.exp = FALSE)
 #'
-#'  pd = data.prep(exp.mat, cn.mat, gene.annot, sample.annot, log.exp = FALSE, gene.list = genes)
+#'  pd.exp = prepped.data[["exp"]]
 #'
-#'  pd.exp = pd[["exp"]]
+#'  pd.cn = prepped.data[["cn"]]
 #'
-#'  pd.cn = pd[["cn"]]
+#'  pd.ga = prepped.data[["gene.annot"]]
 #'
-#'  pd.ga = pd[["gene.annot"]]
-#'
-#'  pd.sa = pd[["sample.annot"]]
+#'  pd.sa = prepped.data[["sample.annot"]]
 #'
 #'  perm.significance.list.compute(pd.exp, pd.cn, pd.ga, pd.sa)
 #'
@@ -56,7 +54,7 @@ perm.significance.list.compute = function(
 	sample.annot = NULL,
 	method = "pearson",
 	digits = 5,
-	num.perms = 1e3,
+	num.perms = 1e2,
 	random.seed = NULL,
 	alternative = "greater"
 	)
